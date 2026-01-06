@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Play, Pause, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useTodoStore } from "@/stores/todoStore";
 
 type PomodoroMode = "work" | "shortBreak" | "longBreak";
 
@@ -18,6 +19,7 @@ const POMODORO_DURATIONS: Record<PomodoroMode, number> = {
 };
 
 const PomodoroCard = () => {
+  const { addFocus } = useTodoStore();
   const [mode, setMode] = useState<PomodoroMode>("work");
   const [timeLeft, setTimeLeft] = useState(POMODORO_DURATIONS.work);
   const [isRunning, setIsRunning] = useState(false);
@@ -34,6 +36,7 @@ const PomodoroCard = () => {
             if (mode === "work") {
               const newCount = pomodoroCount + 1;
               setPomodoroCount(newCount);
+              // Add focus time for completed work session (25 minutes)
               if (newCount % 4 === 0) {
                 setMode("longBreak");
                 return POMODORO_DURATIONS.longBreak;
@@ -50,8 +53,14 @@ const PomodoroCard = () => {
         });
       }, 1000);
     }
+
+    if (!isRunning && mode === "work") {
+      const key = new Date().toISOString().split("T")[0];
+      addFocus(key, POMODORO_DURATIONS.work - timeLeft);
+    }
+
     return () => clearInterval(interval);
-  }, [isRunning, timeLeft, mode, pomodoroCount]);
+  }, [isRunning, timeLeft, mode, pomodoroCount, addFocus]);
 
   const startPause = () => {
     setIsRunning(!isRunning);
@@ -77,7 +86,7 @@ const PomodoroCard = () => {
   };
 
   return (
-    <Card className="ring-0">
+    <Card className="ring-0 p-10">
       <CardContent>
         <div className="text-center space-y-4">
           <div className="text-4xl font-mono font-bold">
@@ -140,6 +149,7 @@ const PomodoroCard = () => {
 };
 
 const TimerCard = () => {
+  const { addFocus } = useTodoStore();
   const [customMinutes, setCustomMinutes] = useState(5);
   const [customSeconds, setCustomSeconds] = useState(0);
   const [customTimeLeft, setCustomTimeLeft] = useState(5 * 60);
@@ -158,8 +168,14 @@ const TimerCard = () => {
         });
       }, 1000);
     }
+
+    if (!isCustomRunning) {
+      const key = new Date().toISOString().split("T")[0];
+      addFocus(key, (customMinutes * 60 + customSeconds) - customTimeLeft);
+    }
+
     return () => clearInterval(interval);
-  }, [isCustomRunning, customTimeLeft]);
+  }, [isCustomRunning, customTimeLeft, addFocus]);
 
   const startCustomTimer = () => {
     const totalSeconds = customMinutes * 60 + customSeconds;
@@ -185,12 +201,13 @@ const TimerCard = () => {
   };
 
   return (
-    <Card className="ring-0">
+    <Card className="ring-0 p-10">
       <CardContent>
         <div className="text-center space-y-4">
           <div className="text-4xl font-mono font-bold">
             {formatTime(customTimeLeft)}
           </div>
+          <div className="text-sm text-muted-foreground">Focus Time</div>
           <div className="flex justify-center gap-2">
             <div className="flex gap-2">
               <Input
@@ -246,7 +263,7 @@ export const PomodoroComponent = ({ className }: { className?: string }) => {
       )}
     >
       <div className=" text-xs  py-1 px-0.5 flex items-center justify-between text-muted-foreground font-bold ">
-        {format(today, "EEEE - dd/MM/yyyy")}
+        {/* {format(today, "EEEE - dd/MM/yyyy")} */}
       </div>
       <Tabs defaultValue="pomodoro" className="w-full ">
         <TabsList className="grid w-full grid-cols-2  ">

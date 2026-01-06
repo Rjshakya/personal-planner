@@ -1,4 +1,4 @@
-
+"use client"
 import { Dashboard } from "./_components/dashboard";
 import { Nav } from "./_components/nav";
 

@@ -16,17 +16,19 @@ export function DatePicker({
   date,
   setDate,
   label = "Date",
+  hideLabel = true,
 }: {
   date: Date | undefined;
   setDate: (d: Date | undefined) => void;
   label: string;
+  hideLabel?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
   //   const [date, setDate] = React.useState<Date | undefined>(undefined);
 
   return (
-    <div className="flex flex-col gap-3">
-      <Label htmlFor="date" className="px-1">
+    <div className="flex flex-col gap-3 ">
+      <Label htmlFor="date" className={`px-1 ${hideLabel && "hidden"}`}>
         {label}
       </Label>
       <Popover open={open} onOpenChange={setOpen}>
@@ -35,7 +37,7 @@ export function DatePicker({
             <Button
               variant="outline"
               id="date"
-              className="w-48 justify-between font-normal"
+              className="w-full justify-between font-normal"
             >
               {date ? date.toLocaleDateString() : "Select date"}
               <ChevronDownIcon />
@@ -46,7 +48,7 @@ export function DatePicker({
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
+            selected={new Date(date || "2026/01/01")}
             captionLayout="dropdown"
             onSelect={(date) => {
               setDate(date);
