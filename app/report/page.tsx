@@ -146,7 +146,7 @@ export default function ReportPage() {
           <Button>Home</Button>
         </Link>
       </nav>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6 mt-12">
         <h1 className="text-3xl font-bold">Weekly Reports</h1>
         <div className="grid md:grid-cols-2 gap-6">
           <WeeklyReportTodos />

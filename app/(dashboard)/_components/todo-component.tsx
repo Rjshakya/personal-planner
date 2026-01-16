@@ -15,7 +15,7 @@ import {
   X,
   PartyPopper,
 } from "lucide-react";
-import { format, isEqual } from "date-fns";
+import { endOfDay, format, isEqual, startOfDay } from "date-fns";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useTodoStore } from "@/stores/todoStore";
@@ -58,56 +58,53 @@ export const TodoComponent = ({ className }: { className?: string }) => {
   }, [todos, toggleDone]);
 
   return (
-    <div
-      className={cn(
-        `bg-amber-300 dark:bg-amber-900 shadow-sm p-1 flex flex-col gap-2 `,
-        className
-      )}
-    >
-      <div className=" text-xs  py-1 px-0.5 flex items-center justify-between text-muted-foreground font-bold ">
-        {format(new Date(), "EEEE - dd/MM/yyyy")}
-        <Dialog>
-          <DialogTrigger
-            render={
-              <Button size={"icon-sm"}>
-                <Plus />
-              </Button>
-            }
-          />
-          <DialogContent className={"p-0"}>
-            <div className="grid gap-2 bg-card p-12">
-              <Input
-                placeholder="New task..."
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addTodo()}
-              />
-              <DatePicker
-                date={new Date(newDate)}
-                setDate={(date) => {
-                  if (!date) return;
-                  setNewDate(date.toISOString());
-                }}
-                label="Date"
-              />
-              <Button onClick={addTodo} size="lg" className={"mt-2"}>
-                <Plus className="h-4 w-4" />
-                Add Task
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+    <div className={cn(` p-1 flex flex-col gap-8 `, className)}>
+      <div className=" text-xs px-0.5 my-4 flex items-center justify-between text-muted-foreground ">
+        {`[ ${format(new Date(), "EEEE - dd/MM/yyyy")} ]`}
       </div>
-      <Card className=" ring-0 h-full">
+      <Card className=" ring-0 shadow-none">
         <CardHeader className="mb-4">
           <CardTitle className="font-bold text-xl flex items-center justify-between">
             <p>Tasks</p>
-            <Button size={"xs"} onClick={() => sethide(!hide)}>
-              {hide ? "show" : "hide"}
-            </Button>
+            <div className=" flex items-center gap-2">
+              <Button size={"sm"} onClick={() => sethide(!hide)}>
+                {hide ? "show" : "hide"}
+              </Button>
+              <Dialog>
+                <DialogTrigger
+                  render={
+                    <Button size={"icon-sm"}>
+                      <Plus />
+                    </Button>
+                  }
+                />
+                <DialogContent className={"p-0"}>
+                  <div className="grid gap-2 bg-card p-12">
+                    <Input
+                      placeholder="New task..."
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addTodo()}
+                    />
+                    <DatePicker
+                      date={new Date(newDate)}
+                      setDate={(date) => {
+                        if (!date) return;
+                        setNewDate(date.toISOString());
+                      }}
+                      label="Date"
+                    />
+                    <Button onClick={addTodo} size="lg" className={"mt-2"}>
+                      <Plus className="h-4 w-4" />
+                      Add Task
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className=" grid gap-6">
+        <CardContent className=" grid gap-6 min-h-[10vh]">
           {todos.map((todo) => {
             if (
               !isEqual(
@@ -154,6 +151,23 @@ export const TodoComponent = ({ className }: { className?: string }) => {
                 </svg>
               </span>
               Congratulations you have completed all your tasks today.
+            </div>
+          )}
+
+          {todos.filter((t) => {
+            const start = startOfDay(new Date());
+            const end = endOfDay(new Date());
+
+            const todoDate = new Date(t.date);
+
+            if (todoDate >= start && todoDate <= end) {
+              return true;
+            }
+
+            return false;
+          }).length === 0 && (
+            <div className="border-2 p-3 flex items-center gap-4">
+              Please set your task for today
             </div>
           )}
         </CardContent>

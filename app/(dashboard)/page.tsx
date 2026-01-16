@@ -6,8 +6,7 @@ export default function Page() {
   return (
     <main className="p-4 relative">
     
-      <Nav/>
-      
+      <Nav />
       <Dashboard />
     </main>
   );
